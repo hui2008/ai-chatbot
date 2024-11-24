@@ -28,18 +28,19 @@ import { PreviewAttachment } from './preview-attachment';
 import { Button } from './ui/button';
 import { Textarea } from './ui/textarea';
 
-const suggestedActions = [
-  {
-    title: 'What is the weather',
-    label: 'in San Francisco?',
-    action: 'What is the weather in San Francisco?',
-  },
-  {
-    title: 'Help me draft an essay',
-    label: 'about Silicon Valley',
-    action: 'Help me draft a short essay about Silicon Valley',
-  },
-];
+// TODO: add earthworks suggested actions
+// const suggestedActions = [
+//   {
+//     title: 'What is the weather',
+//     label: 'in San Francisco?',
+//     action: 'What is the weather in San Francisco?',
+//   },
+//   {
+//     title: 'Help me draft an essay',
+//     label: 'about Silicon Valley',
+//     action: 'Help me draft a short essay about Silicon Valley',
+//   },
+// ];
 
 export function MultimodalInput({
   chatId,
@@ -202,7 +203,7 @@ export function MultimodalInput({
         attachments.length === 0 &&
         uploadQueue.length === 0 && (
           <div className="grid sm:grid-cols-2 gap-2 w-full">
-            {suggestedActions.map((suggestedAction, index) => (
+            {/* {suggestedActions.map((suggestedAction, index) => (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -229,7 +230,7 @@ export function MultimodalInput({
                   </span>
                 </Button>
               </motion.div>
-            ))}
+            ))} */}
           </div>
         )}
 
