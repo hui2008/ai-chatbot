@@ -10,6 +10,7 @@ const provider = createOpenAI({
 })
 
 const model = provider.languageModel(process.env.TEXT_GEN_MODEL || 'llama-3.1-70b-versatile');
+console.log('model', model);
 
 export const customModel = (apiIdentifier: string) => {
   return wrapLanguageModel({

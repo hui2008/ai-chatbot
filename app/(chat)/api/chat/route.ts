@@ -6,6 +6,7 @@ import {
   streamText,
 } from 'ai';
 import { z } from 'zod';
+import dedent from 'dedent'
 
 import { auth } from '@/app/(auth)/auth';
 import { customModel } from '@/lib/ai';
@@ -22,6 +23,7 @@ import {
 } from '@/lib/db/queries';
 import type { Suggestion } from '@/lib/db/schema';
 import {
+  config,
   generateUUID,
   getMostRecentUserMessage,
   sanitizeResponseMessages,
@@ -71,6 +73,7 @@ export async function POST(request: Request) {
   }
 
   const coreMessages = convertToCoreMessages(messages);
+  console.log('POST /api/chat coreMessages: ', coreMessages);
   const userMessage = getMostRecentUserMessage(coreMessages);
 
   if (!userMessage) {
@@ -91,6 +94,11 @@ export async function POST(request: Request) {
   });
 
   const streamingData = new StreamData();
+
+  const current = coreMessages.at(-1)
+  console.log('POST /api/chat question: ', current);
+  current!.content = await generatePrompt(current!.content)
+  console.log('POST /api/chat coreMessages with context: ', coreMessages);
 
   const result = await streamText({
     model: customModel(model.apiIdentifier),
@@ -403,4 +411,23 @@ export async function DELETE(request: Request) {
       status: 500,
     });
   }
+}
+
+async function generatePrompt(question: any) {
+  const response = await fetch(`${config.retrieverUrl}/question`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({content: question })
+  });
+  const result = await response.json();
+  console.log('generatePrompt: ', result.chunks.length);
+  const prompt = dedent`
+  Use the following passages to provide an answer to the question. Please think about the question carefully and go step by step: "${question}"
+
+  ${result.chunks.map((chunk: any) => chunk.pageContent).join('\n\n')}
+  `;
+
+  return prompt;
 }
