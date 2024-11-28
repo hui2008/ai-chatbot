@@ -2,6 +2,7 @@
 
 import type { User } from 'next-auth';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 import { PlusIcon } from '@/components/icons';
 import { SidebarHistory } from '@/components/sidebar-history';
@@ -18,7 +19,7 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar';
 import { BetterTooltip } from '@/components/ui/tooltip';
-import Link from 'next/link';
+import { SignIn } from './sign-in';
 
 export function AppSidebar({ user }: { user: User | undefined }) {
   const router = useRouter();
@@ -63,13 +64,13 @@ export function AppSidebar({ user }: { user: User | undefined }) {
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter className="gap-0 -mx-2">
-        {user && (
+        {user ? (
           <SidebarGroup>
             <SidebarGroupContent>
               <SidebarUserNav user={user} />
             </SidebarGroupContent>
           </SidebarGroup>
-        )}
+        ) : (<SignIn />)}
       </SidebarFooter>
     </Sidebar>
   );

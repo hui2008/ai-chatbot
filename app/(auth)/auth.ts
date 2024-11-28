@@ -1,55 +1,24 @@
-import { compare } from 'bcrypt-ts';
-import NextAuth, { type User, type Session } from 'next-auth';
-import Credentials from 'next-auth/providers/credentials';
+import NextAuth from "next-auth"
+import Keycloak from "next-auth/providers/keycloak"
 
-import { getUser } from '@/lib/db/queries';
-
-import { authConfig } from './auth.config';
-
-interface ExtendedSession extends Session {
-  user: User;
-}
-
-export const {
-  handlers: { GET, POST },
-  auth,
-  signIn,
-  signOut,
-} = NextAuth({
-  ...authConfig,
-  providers: [
-    Credentials({
-      credentials: {},
-      async authorize({ email, password }: any) {
-        const users = await getUser(email);
-        if (users.length === 0) return null;
-        // biome-ignore lint: Forbidden non-null assertion.
-        const passwordsMatch = await compare(password, users[0].password!);
-        if (!passwordsMatch) return null;
-        return users[0] as any;
-      },
-    }),
-  ],
+export const { handlers: { GET, POST }, signIn, signOut, auth } = NextAuth({
+  providers: [Keycloak],
+  // trustHost: true,
   callbacks: {
-    async jwt({ token, user }) {
-      if (user) {
-        token.id = user.id;
+    async session({ session, token }) {
+      console.log('session', session)
+      console.log('token', token)
+      if (token) {
+        const { user } = session
+        session = { ...session, user: { ...user, id: token.sub! } }
       }
 
-      return token;
+      console.log('enriched session', session)
+      return session
     },
-    async session({
-      session,
-      token,
-    }: {
-      session: ExtendedSession;
-      token: any;
-    }) {
-      if (session.user) {
-        session.user.id = token.id as string;
-      }
-
-      return session;
-    },
+    authorized({ auth, request: { nextUrl } }) {
+      console.log('authorized', auth, nextUrl)
+      return !!auth?.user;
+    }
   },
 });
